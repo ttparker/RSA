@@ -1,0 +1,19 @@
+This program encrypts and decrypts messages using the RSA algorithm. You shouldn't need to modify the source code below the first few lines of each file, which set a few global constants. All data (i.e. the initial plaintext to be encrypted and the generated public key, secret key, ciphertext, and decrypted text) are stored as text files in a directory which is named "Data/" by default.
+
+To generate public and secret keys to receive messages, set the maximum message length in "keygen.jl" and then run it. You only need to do this once, not separately for each message. On my laptop, the key generation time becomes noticeable for messages around 600 characters. The public exponent e does not need to be very large - basically, only professionals can crack even e=3 ! (http://crypto.stanford.edu/~dabo/abstracts/RSAattack-survey.html. Nor does the value of e significantly affect the running time.) The public key (two numbers) and secret key (one number) are saved as text files whose filenames you can specify.
+
+To encrypt a message, save the plaintext (in number form) and the recipient's public key as text files in the data directory, set the filenames in "encrypt.jl", then run that program. The plaintext can contain any ASCII characters. (This means that we are using a large 128-letter alphabet. For purely numerical data the alphabet is much smaller, so we can encode much longer messages. Depending on the RNG behavior during the key generation step, you might get one or two characters' leeway above the max length, but above that your message gets completely scrambled.)
+
+To decrypt a message, save the sender's ciphertext and your public and secret keys in the data directory, set the filenames in "decrypt.jl", then run that program.
+
+Note that the encryption and decryption are almost completely trivial, each consisting of a single modular exponentiation. "encrypt.jl" and "decrypt.jl" each only perform a single substantive calculation - the rest is I/O. All the real work is in the key generation.
+
+*****
+
+Technical note: there are three primary variants of RSA (the differences are small and completely unimportant conceptually - they just make the algorithm slightly more efficient):
+
+1. The original paper proposed first choosing the secret decryption exponent d, then calculating the public encryption exponent e in terms of d. It also proposed that the exponents be modular multiplicative inverses (MMIs) with respect to the Euler totient function phi(N) of the public key N.
+2. The public-key encryption standard PKCS #1 v1.0 requires first choosing e and then calculating d in terms of e, rather than vice versa.
+3. PKCS #1 v2.0 requires that d and e be MMIs with respect to the Carmichael function lambda(N) rather than the Euler totient function phi(N).
+
+This code corresponds to variant #2.
